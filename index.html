@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="static/style.css">
+    <script src="main.js" defer></script>
+    <link rel="preconnect" href="https://fonts.gstatic.com">
+    <script src="https://kit.fontawesome.com/07af032514.js" crossorigin="anonymous"></script>
+    <title>PortFolio</title>
+</head>
+
+<body>
+    <header class="navBar">
+        <div class="navBar__logo">
+            <i class="fas fa-user"></i>
+            <a href="#">Cho, Seong-Eun</a>
+        </div>
+        <ul class="navBar__menus">
+            <li><a href="#">Home</a></li>
+            <li><a href="#about">About</a></li>
+            <li><a href="#projects">MyProjects</a></li>
+            <li><a href="#contact">Contact</a></li>
+        </ul>
+        <a href="#" class="navBar__toggleBtn">
+            <i class="fas fa-bars"></i>
+        </a>
+    </header>
+    <article class="content__container">
+        <section class="profile">
+            <img src="static/images/selfie.png" alt="">
+            <div class="profile__body">
+                <h1>GreedyGuy</h1>
+                <h3>A Software Engineer Currently Residing In Gwang-ju, Korea</h3>
+            </div>
+            <div class="profile__contact">
+                <a href="https://github.com/sts827">Contact Me</a>
+            </div>
+        </section>
+
+        <section class="about">
+            <div class="bio">
+                <a href="" name="about"></a>
+                <h1>About me</h1>
+                <h3>소프트웨어의 힘은 세상을 바꾸는 중요한 열쇠라고 생각합니다.</h3>
+                <span>
+                    어려서부터 호기심이 많고 탐험심이 높아 어떤 물건의 작동 방법을 분석하는 것과 이를 설계하는 것에 흥미를 느꼈습니다.
+                    이를 통해 새로운 지식을 습득하는 것에 항상 즐거웠습니다. 대학시절 자율비행 드론의 개발을 목표로 2년 동안 대학 연구실에서 스테레오 비전을 연구하여 드론대회와 논문 대회에서 상을 받았습니다.
+                    프로젝트 기간 중 100편 이상의 논문을 분석하고 Python과 C/C++을 이용한 영상처리 분야에 관한 논문을 3편 제작하였습니다. 이러한 경험을 통해서 소프트웨어 개발에 관심을 가지게 되었고 보다 높은 전문성을 갖추기 위해
+                    (주)소프트웨어소사이어티에서 체계있는 교육과정을 수료하였습니다.  
+                    <!-- 현재 제가 관심있는 분야는 
+                    해당 과정에서 Web Application제작을 위해 Machine learning을 이용한 팀프로젝트를 진행하였고
+                    공모전에서 수상을 하게 되었습니다.
+                    이러한 성격으로 인해 학창시절뿐만 아니라 현재도 여러 공공기관의 공모전과 아이디어 대회에 참가하여 꾸준한 활동을 하고
+                    있습니다. -->
+                </span>
+            </div>
+            <div class="skill__set">
+                <div class="frontend__logo">
+                    <i class="fab fa-html5"></i>
+                    <h1>Front-end</h1>
+                    <span>HTML, CSS, JavaScript, tailWind, gulp</span>
+                </div>
+                <div class="backend__logo">
+                    <i class="fas fa-server"></i>
+                    <h1>Back-end</h1>
+                    <span>Java, Python, Django, Spring, ML/DL</span>
+                </div>
+            </div>
+            <div class="career__logo">
+                <img src="static/images/cal_logo.png" alt="company__logo">
+                <h3>Worked at Cal as Software Engineer (20.01~05)</h3>
+            </div>
+        </section>
+        <section class="myWork">
+            <h1>My Work</h1>
+            <a href="" name="projects"></a>
+            <h3>projects</h3>
+            <ul class="project__names">
+                <li class="items"><a href="#projects" data-key="type" data-value="default">All</a></li>
+                <li class="items"><a href="#projects" data-key="type" data-value="challenge">Rocket &
+                        DroneChallenges</a></li>
+                <li class="items"><a href="#projects" data-key="type" data-value="bigLeader">BigLeader Project</a>
+                </li>
+                <li class="items"><a href="#projects" data-key="type" data-value="swdo">World Wide Welbeing</a></li>
+            </ul>
+            <div class="projects">
+                <ul class="item__list"></ul>
+            </div>
+        </section>
+    </article>
+</body>
+
+</html>

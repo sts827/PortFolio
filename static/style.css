@@ -1,0 +1,289 @@
+:root{
+    /* font-size */
+    /* font-color */
+    /* font */
+
+}
+body{
+    margin:0;
+    font-family: 'Source Sans Pro';
+}
+header{
+    display:flex;
+    justify-content: space-between;
+    align-items: center;
+    padding:8px 12px;
+    background-color: #f5f5f5;
+}
+a{
+    text-decoration: none;
+    color:#000000d8;
+}
+.navBar__logo{
+    font-size: 24px;
+    color:#bebebe
+}
+.navBar__logo i{
+    color:#808d89;
+}
+.navBar__menus{
+    display:flex;
+    list-style: none;
+    padding-left: 0;
+}
+.navBar__menus li{
+    padding:8px 12px;
+    font-size: 20px;
+}
+.navBar__menus li:hover{
+    font-weight:bold;
+    border-radius: 10px;
+}
+.navBar__toggleBtn{ 
+    display:none;
+    position:absolute;
+    right:32px;
+    font-size:20px;
+    color:#000000;
+}
+/* landingSection */
+.profile{
+    display:flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align:center; 
+    background-size:cover;
+    background-image: url('images/ladingCover.jpg');
+    background-repeat: no-repeat;
+    height:650px;
+}
+.profile img{
+    max-width:220px;
+    width:100%;
+    margin:auto;
+    border-radius: 50%;
+}
+.profile__body{
+    max-width:1030px;
+    width:100%;
+    margin:auto;
+}
+.profile__body>h1{
+    font-size:30px;
+}
+.profile__contact{
+    max-width:200px;
+    width:100%;
+    margin:20px auto;
+    font-size:30px;
+    border:solid;
+    border-radius: 10px;
+}
+.profile__contact:hover{
+    background-color: #b4c5c4d8;
+}
+/* About Me section */
+.about{
+    background-image: url('images/aboutCover.jpg');
+    background-repeat: no-repeat;
+    background-size: cover;
+    color:#e6e6e6;
+    display: flex;
+    height:100%;
+    flex-direction: column;
+    justify-content: space-around;
+}
+.bio{
+    max-width:1000px;
+    width:100%;
+    margin:auto;
+    align-self: center;
+}
+.bio span{
+    padding:8px 12px;
+}
+.bio h1{
+    font-size:40px;
+    text-align: center;
+}
+.bio h3{
+    text-align: center;
+}
+.skill__set{
+    max-width:1040px;
+    width:100%;
+    display:flex;
+    justify-content: space-around;
+    margin:40px auto;
+    text-align: center;
+}
+.skill__set>.frontend__logo, .skill__set>.backend__logo{
+    max-width:260px;
+    width:100%;
+}
+.frontend__logo>i, .backend__logo>i{
+    font-size:120px;
+}
+.career__logo{
+    max-width: 1030px;
+    width:100%;
+    margin:20px auto;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+.career__logo h3{
+    margin-left:30px;
+}
+.career__logo img{
+    max-width: 100px;
+    width:100%;
+    border-radius:50%;
+}
+
+/* My Work Section */
+.myWork{
+    max-width: 1200px;
+    width:100%;
+    margin:auto;
+    display:flex;
+    flex-direction:column;
+}
+.myWork h1{
+    text-align: center;
+    font-size:40px;
+}
+.myWork h3{
+    text-align: center;
+    font-size: 24px;
+}
+.project__names{
+    max-width: 1030px;
+    width:100%;
+    margin:20px auto;
+    display:flex;
+    list-style:none;
+    justify-content: center;
+    align-items: center;
+    padding-left: 0;
+    font-size:20px;
+}
+
+.project__names li{
+    max-width:200px;
+    width:100%;
+    margin:auto;
+    border-radius:10px;
+    text-align: center;
+}
+.project__names >li:hover{
+    font-weight: bold;
+}
+/* project lists */
+.projects{
+    max-width:1200px;
+    width:100%;
+    margin:0 auto;
+}
+.item__list{
+    display:flex;
+    flex-wrap:wrap;
+    justify-content: center;
+    align-items: center;    
+    padding-left:0;
+}
+.item__list>li{
+    list-style: none;
+    padding:8px 10px;
+}
+.screen{
+    /* 스르륵 텍스트 효과: 레이어 속성 기준 */
+    position:relative;
+    overflow: hidden;
+    text-align: center;
+    /* 요소밖이면 hidden */
+}
+.screen::after{
+    content:'';
+    display:block;
+    position:absolute;
+    top:0;
+    left:0;
+    width:100%;
+    height:100%;
+    background:rgba(0,0,0,0.5);
+    z-index:1;
+    opacity:0;
+    transition:all .35s;
+}
+.project__image>img{
+    max-width:218px;
+    max-height:294px;
+    height:100%;
+}
+.screen>.top{
+    position:absolute;
+    max-width:200px;
+    width:100%;
+    bottom:150%; /* relative로부터 150%아래에 위치 */
+    z-index:2;
+    color:white;
+    font-size:26px;
+    font-weight: 900;
+    /* 자연스러운 움직임을 보여주기 위한 transition */
+    transition:all .35s;
+}
+.screen>.bottom{
+    position:absolute;
+    max-width:200px;
+    width:100%;
+    top:150%; /* relative로부터 150%아래에 위치 */
+    z-index:2;
+    color:white;
+    font-size:12px;
+    transition:all .35s;
+}
+
+/* preojct_image hover시 텍스트 위,아래로 보여주기  */
+.item__list>li>a:hover .top{
+    bottom:52%;
+}
+.item__list>li>a:hover .bottom{
+    top:60%;
+}
+.item__list>li>a:hover .screen::after{
+    opacity:1;
+}
+
+@media screen and (max-width:768px){
+    .navBar{
+        flex-direction: column;
+        align-items: flex-start;
+        padding:8px 24px;
+    }
+    .navBar__menus{
+        display:none;
+        flex-direction: column;
+        align-items: center;
+        width:100%;
+    }
+    .navBar__menus li{
+        width:100%;
+        text-align: center;
+    }
+    .navBar__toggleBtn{
+        display:block
+    }
+    .navBar__menus.active{
+        display:flex;
+    }
+    .project__names{
+        flex-direction:column;
+        align-items: flex-start;
+    }
+    .project__names>li{
+        margin-bottom:25px;
+    }
+
+}

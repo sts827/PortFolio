@@ -1,0 +1,74 @@
+{
+  "items": [
+    {
+      "type": "bigLeader",
+      "img": "data/img/bigLeader/1.jpg",
+      "usage": ["python", "django", "gulp", "tailwind"],
+      "function": ["호스팅", "예약", "메시지", "로그인", "추천"],
+      "video": ""
+    },
+    {
+      "type": "bigLeader",
+      "img": "data/img/bigLeader/2.jpg",
+      "usage": ["python", "django", "gulp", "tailwind"],
+      "function": ["호스팅", "예약", "메시지", "로그인", "추천"],
+      "video": ""
+    },
+    {
+      "type": "bigLeader",
+      "img": "data/img/bigLeader/3.jpg",
+      "usage": ["python", "django", "gulp", "tailwind"],
+      "function": ["호스팅", "예약", "메시지", "로그인", "추천"],
+      "video": ""
+    },
+    {
+      "type": "challenge",
+      "img": "data/img/challenge/1.png",
+      "usage": ["Matlab", "C/C++", "OpenCV", "Computer-Vision"],
+      "function": ["자세", "상대위치"],
+      "video": ""
+    },
+    {
+      "type": "challenge",
+      "img": "data/img/challenge/2.jpg",
+      "usage": [""],
+      "function": "",
+      "video": ""
+    },
+    {
+      "type": "challenge",
+      "img": "data/img/challenge/3.jpg",
+      "usage": ["Matlab", "C/C++", "OpenCV", "Computer-Vision"],
+      "function": "",
+      "video": ""
+    },
+    {
+      "type": "challenge",
+      "img": "data/img/challenge/4.jpg",
+      "usage": "",
+      "function": "",
+      "video": ""
+    },
+    {
+      "type": "challenge",
+      "img": "data/img/challenge/5.jpg",
+      "usage": ["C/C++"],
+      "function": ["1축제어"],
+      "video": ""
+    },
+    {
+      "type": "challenge",
+      "img": "data/img/challenge/6.jpg",
+      "usage": ["CATIA"],
+      "function": [""],
+      "video": ""
+    },
+    {
+      "type": "challenge",
+      "img": "data/img/challenge/7.jpg",
+      "usage": ["CATIA"],
+      "function": [""],
+      "video": ""
+    }
+  ]
+}
