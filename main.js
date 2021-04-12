@@ -20,7 +20,7 @@ function displayItems(items) {
 function createHTMLString(item) {
   return `
     <li>
-      <a href="https://github.com/sts827">
+      <a href="https://github.com/sts827/PortFolio">
           <div class="project__image screen">
               <div class="top">${item.type} </div>
               <div class="bottom">${item.usage}</div>
