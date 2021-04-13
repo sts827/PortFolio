@@ -23,6 +23,10 @@ a{
     font-size: 24px;
     color:#bebebe
 }
+.navBar__logo >i:hover, .navBar__logo > a:hover{
+    color:#689f38;
+    transition: all 0.35s;
+}
 .navBar__logo i{
     color:#808d89;
 }
@@ -82,6 +86,7 @@ a{
 }
 .profile__contact:hover{
     background-color: #b4c5c4d8;
+    transition: all 0.35s;
 }
 /* About Me section */
 .about{
@@ -100,16 +105,47 @@ a{
     margin:auto;
     align-self: center;
 }
-.bio span{
+.bio > .bio__title{
+    display:flex;
+    justify-content: center;
+    align-items: center;
+    font-size:40px;
+}
+.bio > .bio__title > h1, .bio > .bio__title > i{
+    font-size:40px;
+    margin-left:10px;
+    text-align: center;
+    color:#0e3742;
+    -webkit-box-reflect:below 1px linear-gradient(transparent, #0008);
+    line-height: 0.70em;
+    outline:none;
+    animation: animate 5s linear infinite;
+}
+.bio > span{
     padding:8px 12px;
 }
-.bio h1{
-    font-size:40px;
-    text-align: center;
+
+@keyframes animate{
+    0%,18%,20%,50.1%,65.1%,80%,90.1%,92%
+    {
+        color:#0e3742;
+        text-shadow:none;
+    }
+    18.1%,20.1%,30%,50%,60.1%,80.1%,90%,92.1%,100%{
+        color:white;
+        text-shadow: 0 0 10px #03bcf4,
+        0 0 20px #03bcf4,
+        0 0 40px #03bcf4,
+        0 0 80px #03bcf4,
+        0 0 160px #03bcf4,
+    }
+
 }
 .bio h3{
     text-align: center;
 }
+
+
 .skill__set{
     max-width:1040px;
     width:100%;

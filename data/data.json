@@ -9,7 +9,7 @@
     },
     {
       "type": "bigLeader",
-      "img": "data/img/bigLeader/2.jpg",
+      "img": "data/img/bigLeader/2.gif",
       "usage": ["python", "django", "gulp", "tailwind"],
       "function": ["호스팅", "예약", "메시지", "로그인", "추천"],
       "video": ""
@@ -17,6 +17,13 @@
     {
       "type": "bigLeader",
       "img": "data/img/bigLeader/3.jpg",
+      "usage": ["python", "django", "gulp", "tailwind"],
+      "function": ["호스팅", "예약", "메시지", "로그인", "추천"],
+      "video": ""
+    },
+    {
+      "type": "bigLeader",
+      "img": "data/img/bigLeader/4.gif",
       "usage": ["python", "django", "gulp", "tailwind"],
       "function": ["호스팅", "예약", "메시지", "로그인", "추천"],
       "video": ""
@@ -58,15 +65,8 @@
     },
     {
       "type": "challenge",
-      "img": "data/img/challenge/6.jpg",
-      "usage": ["CATIA"],
-      "function": [""],
-      "video": ""
-    },
-    {
-      "type": "challenge",
-      "img": "data/img/challenge/7.jpg",
-      "usage": ["CATIA"],
+      "img": "data/img/challenge/6.gif",
+      "usage": ["Matlab", "C/C++", "OpenCV", "Computer-Vision"],
       "function": [""],
       "video": ""
     }
