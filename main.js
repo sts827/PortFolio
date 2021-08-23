@@ -1,6 +1,5 @@
 const toggleBtn = document.querySelector(".navBar__toggleBtn");
 const menu = document.querySelector(".navBar__menus");
-
 //<-Show Item->
 toggleBtn.addEventListener("click", () => {
   menu.classList.toggle("active");
