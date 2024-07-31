@@ -1,0 +1,130 @@
+body {
+    margin: 0;
+    padding-left:0;
+    position: relative;
+    overflow: hidden;
+    height:100%;
+}
+
+
+
+#scroll{
+    position:relative;
+}
+#scroll .chevron_down{
+    content: '';
+    position: absolute;
+    right: 67px;
+    bottom: 135px;
+    width: 15px;
+    height: 15px;
+    border-right: 3px solid #d9d9d9;
+    border-bottom: 3px solid #d9d9d9;
+    transform: translate(-50%, -50%) rotate(45deg);
+    animation: fadeInOut 1.5s linear infinite;
+    z-index: 9999;
+    margin: 0;
+    padding: 0;
+}
+
+#scroll .mouse_icon{
+    width:30px;
+    height:50px;
+    background-color:transparent;
+    border:solid 3px #d9d9d9;
+    border-top-left-radius:30px;
+    border-top-right-radius:30px;
+    border-bottom-left-radius:30px;
+    border-bottom-right-radius:30px;
+    position:absolute;
+    right:50px;
+    bottom:50px;
+    transform:translate(-50%,-50%);
+    z-index:9999;
+}
+
+
+#scroll .mouse_icon::after{
+    content:"";
+    width:10px;
+    height:10px;
+    border-radius:50%;
+    background-color:#d9d9d9;
+    position:absolute;
+    top:20%;
+    left:50%;
+    transform:translateX(-50%);
+    animation:scroll infinite 1.5s;
+}
+
+
+/* test onescroll page */
+#contents{
+    display:block;
+    position:absolute;
+    top:0;
+    width:100%;
+    height:100%;
+    transition:.3s;
+}
+
+#contents .pages:nth-child(1){
+    height:100%;
+    background-color:yellow;
+}
+
+#contents .pages:nth-child(2){
+    height:100%;
+    background-color:white;
+}
+#contents .pages:nth-child(3){
+    height:100%;
+    background-color:red;
+}
+
+
+
+/* 애니메이션 정의 */
+@keyframes fadeInOut {
+    0% {
+        opacity: 1;
+    }
+    100% {
+        opacity: 0;
+    }
+}
+@keyframes scroll {
+    0%{
+        opacity:1;
+        top:20%;
+    }
+    100%{
+        opacity:0;
+        top:60%;
+    }
+    
+}
+
+
+
+
+/* modalWrapper  */
+@media screen and (min-width: 1281px) {
+    /** 데스크탑 */
+}
+
+@media screen and (max-width: 1280px) {
+    /** 타블렛 가로, 노트북 */
+}
+
+@media screen and (max-width: 1024px) {
+    /** 타블렛 가로, 노트북 */
+}
+
+@media screen and (max-width: 768px) {
+    /** 모바일 가로, 타블렛 세로 */
+}
+
+@media screen and (max-width: 480px) {
+    /** 모바일 세로 */
+}

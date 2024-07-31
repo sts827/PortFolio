@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>globe Test</title>
+    <link rel="stylesheet" href="./globe.css">
+    <title>Marshal</title>
+    <!-- importmap 정의 -->
+    <script type="importmap">
+        {
+            "imports": {
+                "three": "https://cdn.jsdelivr.net/npm/three@0.166.1/build/three.module.js",
+                "OrbitControls":"https://cdn.jsdelivr.net/npm/three@0.166.1/examples/jsm/controls/OrbitControls.min.js",
+                "three-globe":"https://cdn.jsdelivr.net/npm/three-globe@2.31.1/+esm",
+                "trackControl":"https://cdn.jsdelivr.net/npm/three@0.166.1/examples/jsm/controls/TrackballControls.js",
+                "transformControls":"https://cdn.jsdelivr.net/npm/three@0.166.1/examples/jsm/controls/TransformControls.js",
+                "css2Renderer":"https://cdn.jsdelivr.net/npm/three@0.166.1/examples/jsm/renderers/CSS2DRenderer.js",
+                "tween":"https://cdn.jsdelivr.net/npm/@tweenjs/tween.js@23.1.2/+esm",
+                "starfield":"./static/js/starfield.js",
+                "frezenMat":"./static/js/fresnelMat.js"
+            }
+        }
+    </script>
+</head>
+
+<body>
+    <div id="globe"></div>
+    <script type="module">
+        import * as THREE from 'three';
+        import { OrbitControls } from 'OrbitControls';
+        import { TransformControls } from 'transformControls';
+        import { CSS2DRenderer } from 'css2Renderer';
+        import getFragment from './static/js/fragment.js';
+        import getVertex from './static/js/vertex.js';
+
+
+        // 초기 세팅
+        const SCREEN_WIDTH = window.innerWidth;
+        const SCREEN_HEIGHT = window.innerHeight;
+        const ASPECT = SCREEN_WIDTH / SCREEN_HEIGHT;
+
+        // render dom
+        const globeContainer = document.getElementById("globe");
+        const transitionData = new Map();
+
+        // texture image URL
+        const mapURL = "./static/images/globe/globe_map.jpg";
+        const normalURL = "./static/images/globe/earth_normal_2048.jpg";
+        const bumpURL = "./static/images/globe/earth_bump.jpg";
+        const spechURL = "./static/images/globe/earth_spec.jpg";
+        // const metalURL = "./static/images/globe/earth_spec.jpg"
+        // const emissiveURL = "./static/images/globe/earth_night.jpg";
+        const earthNight = "./static/images/globe/earth_night.jpg";
+        const earthNight_high = "./static/images/globe/night_sky.png"
+        const earthNight_low = "./static/images/globe/blackMarble.jpg"
+        const cloudURL = "./static/images/globe/clouds.png";
+
+        // const backgroundURL = "./static/images/globe/space_bg.png"
+        const sceneBgUrl = "./static/images/globe/background_space.jpg";
+
+        const CLOUDS_ALT = 0.004;
+        const CLOUDS_ROTATION_SPEED = -0.006; // deg/frame
+
+        // 지구의 자전 주기 (초 단위)
+        const EARTH_ROTATION_PERIOD = 23.9345 * 3600; // 23.9345시간 * 3600초
+        // 지구본 약간의 기울임을 위한 각도 설정 (라디안)
+        const tiltAngle = 23.5 * Math.PI / 180;; // 15도를 라디안으로 변환
+
+        const scene = new THREE.Scene();
+        const camera = new THREE.PerspectiveCamera(75, ASPECT, 0.1, 1000);
+
+        const renderer = new THREE.WebGLRenderer({ antialias: true });
+
+        // helper
+        const helper = new THREE.CameraHelper(camera);
+        scene.add(helper);
+        const axesHelper = new THREE.AxesHelper(5);
+        scene.add(axesHelper);
+
+        // 초기 배경생성
+        renderer.setSize(innerWidth, innerHeight);
+        renderer.setPixelRatio(window.devicePixelRatio);
+        globeContainer.appendChild(renderer.domElement);
+
+        // texture 이미지
+
+        console.log("getVertex: ", getVertex);
+        console.log("getFragment: ", getFragment);
+        // 오브젝트 생성 순서 geometry -> material -> mesh -> scene추가
+        const globeGeo = new THREE.SphereGeometry(5, 50, 50);
+        const basicMat = new THREE.MeshBasicMaterial({
+            map: imageLoader(mapURL)
+        });
+        // const shaderMat = new THREE.ShaderMaterial({
+        //     uniforms: {
+        //         sunDirection: { value: new THREE.Vector3(-2, -0.5, 1.5) },
+        //         dayTexture: { value: imageLoader(mapURL) },
+        //         nightTexture: { value: imageLoader(earthNight_low) }
+        //     },
+        //     vertexShader: getVertex,
+        //     fragmentShader: getFragment,
+        // })
+        // TODO.. ->
+
+        function init() {
+            // createObject
+            createObject(globeGeo, shaderMat)
+        }
+
+        function createObject(geometry, material) {
+            // 오브젝트 생성 순서 geometry -> material -> mesh -> scene추가
+            const object = new THREE.Mesh(geometry, material);
+            // object 추가
+            scene.add(object);
+            camera.position.z = 10;
+            // camera.position.set(position);
+
+        }
+
+
+        function imageLoader(url) {
+            return new THREE.TextureLoader().load(url);
+        }
+
+        function animate() {
+            requestAnimationFrame(animate);
+
+            renderer.render(scene, camera);
+
+        }
+
+        init();
+        animate();
+
+    </script>
+</body>
+
+</html>

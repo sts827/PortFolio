@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+        integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+        integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+    <title>Document</title>
+    <script src="//unpkg.com/globe.gl"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.6.1/gsap.min.js"></script>
+
+    <style>
+        body {
+            margin: 0;
+        }
+
+        #globeContainer {
+            position: relative;
+        }
+
+        /* #wrap {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(10, 43, 119, 0.4);
+            z-index: 10;
+        } */
+    </style>
+</head>
+
+<body>
+    <div id="infoContainer">
+        <div id="globe"></div>
+        <div id="info">
+            <div class=""></div>
+            <div class=""></div>
+        </div>
+        <div id="mapViewBtn"></div>
+    </div>
+    <div id="map"></div>
+    <script type="module">
+        import * as THREE from '//unpkg.com/three/build/three.module.js';
+        // 기본 설정
+        const params = {
+            // general scene params
+            sunIntensity: 1.3, // brightness of the sun
+            speedFactor: 2.0, // rotation speed of the earth
+            metalness: 0.1,
+            atmOpacity: { value: 0.7 },
+            atmPowFactor: { value: 4.1 },
+            atmMultiplier: { value: 9.5 },
+        }
+
+        // globe rendering dom
+        const globeElement = document.getElementById('globe');
+        const transitionData = new Map();
+
+
+        // image URL
+        const mapURL = "./static/images/globe/globe_map.jpg";
+        const normalURL = "./static/images/globe/earth_normal_2048.jpg";
+        const bumpURL = "./static/images/globe/earth_bump.jpg";
+        const roughURL = "./static/images/globe/earth_spec.jpg";
+        const metalURL = "./static/images/globe/earth_spec.jpg"
+        const emissiveURL = "./static/images/globe/earth_night.jpg";
+        const cloudURL = "./static/images/globe/clouds.png";
+        const CLOUDS_ALT = 0.008;
+        const CLOUDS_ROTATION_SPEED = -0.006; // deg/frame
+
+
+        // core utilities object
+        const textureLoad = (url) => {
+            return new THREE.TextureLoader().load(url);
+        };
+        // mesh obj
+        const mesh = new THREE.Mesh();
+        // globe mesh
+        let geoSphere = new THREE.SphereGeometry();
+        const globeMap = textureLoad(mapURL);
+        // globeMap.colorSpace = THREE.SRGBColorSpace;
+
+        // const globeMat = new THREE.MeshStandardMaterial({
+        //     map: globeMap,
+        //     bumpMap: textureLoad(bumpURL),
+        //     bumpScale: 0.03, // must be really small, if too high even bumps on the back side got lit up
+        //     roughnessMap: textureLoad(roughURL), // will get reversed in the shaders
+        //     metalness: params.metalness, // gets multiplied with the texture values from metalness map
+        //     metalnessMap: textureLoad(metalURL),
+        //     emissiveMap: textureLoad(emissiveURL),
+        //     emissive: new THREE.Color(0xffff88),
+        //     side: THREE.FrontSide,
+        // });
+
+        const phongMat = new THREE.MeshPhongMaterial({
+            specular: 0x7c7c7c,
+            map: globeMap,
+            bumpMap: textureLoad(bumpURL),
+            specularMap: textureLoad(roughURL),
+            normalMap: textureLoad(normalURL),
+            normalScale: new THREE.Vector2(0.85, - 0.85),
+        });
+        phongMat.map.colorSpace = THREE.SRGBColorSpace;
+
+        // 지구본 객체 생성
+        const world = Globe()(globeElement)
+            // .showAtmosphere(true)
+            // .atmosphereAltitude(0.2)
+            // .atmosphereColor("#21a1e1")
+            .globeMaterial(phongMat)
+        world.globeMaterial().castShadow = true;
+        const clock = new THREE.Clock();
+        const controls = world.controls();
+        const renderer = world.renderer();
+        const scene = world.scene();
+        const width = window.innerWidth;
+        const height = window.innerHeight;
+        const aspect = width / height;
+        const camera = world.camera(new THREE.PerspectiveCamera(75, aspect, 0.1, 1000));
+        scene.add(camera);
+
+        // 조명
+        renderer.shadowMap.enabled = true; // 그림자 활성화
+        renderer.shadowMap.type = THREE.VSMShadowMap; // 그림자 타입 설정 
+        // 조명색깔 및 위치 설정
+        const dirLight = world.lights().find(light => light.type === 'DirectionalLight');
+        dirLight.position.set(1 - 500, 1);
+        dirLight.intensity = 5;
+        dirLight.castShadow = true;
+        dirLight.shadow.camera.near = 0.5;
+        dirLight.shadow.camera.far = 1000;
+        dirLight.shadow.camera.left = -500;
+        dirLight.shadow.camera.right = 500;
+        dirLight.shadow.camera.top = 500;
+        dirLight.shadow.camera.bottom = -500;
+        dirLight.shadow.radius = 5;
+        dirLight.shadow.blurSamples = 25;
+        scene.add(dirLight);
+
+        const helper = new THREE.CameraHelper(dirLight.shadow.camera)
+        const helperCam = new THREE.CameraHelper(camera)
+
+        scene.add(helper);
+        scene.add(helperCam);
+
+        // 구름 메쉬
+        let cloudGeo = new THREE.SphereGeometry(world.getGlobeRadius() * (1 + 0.006), 64, 32);
+        const cloudsMap = textureLoad(cloudURL);
+        const cloudMat = new THREE.MeshStandardMaterial({
+            map: cloudsMap,
+            transparent: true,
+            // opacity: 0.8
+        });
+        const clouds = new THREE.Mesh(cloudGeo, cloudMat);
+        scene.add(clouds);
+
+        // 그림자
+        // let globe = scene.children[0];
+        // globe.castShadow = true;
+        // console.log("globe: ", globe)
+
+        // let shadowGeo = new THREE.SphereGeometry(105, 64, 32);
+        // const sphereMaterial = new THREE.MeshStandardMaterial({ color: 0x050505, transparent: true, opacity: 0.9 });
+        // let spherer = new THREE.Mesh(shadowGeo, sphereMaterial);
+        // spherer.castShadow = true; //default is false
+        // spherer.receiveShadow = false; //default
+        // scene.add(spherer)
+
+        // add meshI(geometry, material) -> scene().add(mesh_obj)
+        // 카메라
+        // const orgPosCamera = camera.position;
+        // console.log("origin-camera-position: ", orgPosCamera);
+        // console.log("world coordinates of camera:....", camera.getWorldDirection(new THREE.Vector3()));
+
+        controls.enableDamping = true;
+        controls.dampingFactor = 0.1;
+
+        function init() {
+            // 초기 세팅
+            loadGeoJsonData();
+
+            //
+            animate();
+        }
+
+        renderer.domElement.addEventListener('wheel', function (event) {
+            event.preventDefault();
+            console.log("wheel event:.. ", event);
+            // 최대/최소 줌 설정
+            console.log("controls:..", controls.getDistance());
+            console.log("world.globalRadius: ", world.getGlobeRadius());
+
+            // const maxDistance = 1000;
+            // const minDistance = 150;
+            // const moveDistance = event.deltaY > 0 ? "zoomIn" : "zoomOut";
+            // camera.position.set(-10,-10,300);
+            // // camera.position.x = -4;
+            // camera.position.y = -3;
+            // camera.position.z = 300;
+            // controls.update();
+            // const newZ = camera.position.z + moveDistance;
+            // const newPostion = setNewPositionCam();
+            // if (newZ <= maxDistance && newZ > minDistance) {
+            //     setCameraZPosition(newPostion, 0.13)
+            // } else {
+            //     // do nothing...
+            //     controls.maxDistance = maxDistance;
+            //     controls.minDistance = minDistance;
+            // }
+        });
+
+        function setNewPositionCam() {
+
+        }
+
+        // GeoJSON 데이터 로드
+        async function loadGeoJsonData() {
+            const geoJsonUrl = './data/geo.json';
+            const response = await fetch(geoJsonUrl);
+            const geoJsonData = await response.json();
+
+            // 데이터 가공 및 렌더링
+            const features = geoJsonData.features.map(item => ({
+                ...item,
+                color: "#ffffff",
+                elevate: false
+            }));
+
+
+            // world.hexPolygonsData(features)
+            //     .hexPolygonMargin(0.1)
+            //     .hexPolygonColor(d => d.color)
+            //     .hexPolygonAltitude(d => d.elevate ? 0.01 : 0)
+            //     .onHexPolygonHover(handleHexPolygonHover, 50)
+            //     .onHexPolygonClick(handleSelectArea)
+        }
+
+        function setCameraZPosition(camPosition, duration) {
+            gsap.to(camera.position, {
+                x: camPosition["x"],
+                y: camPosition["y"],
+                z: camPosition["z"],
+                duration: duration,
+                ease: "power1.inOut",
+                onUpdate: () => controls.update()
+            });
+        }
+
+        function handleSelectArea(event) {
+            // sample
+            console.log("clicked area: ", event);
+            console.log("clicked country name: ", event.properties.name_ko);
+
+            let countryName = event.properties.name_ko
+            let lng = event.properties.label_x;
+            let lat = event.properties.label_y;
+            let altitude = 1.5;
+            world.pointOfView({
+                lat, lng, altitude
+            }, 2000)
+
+        }
+
+        // 호버 이벤트 핸들러
+        function handleHexPolygonHover(hex, previousHex) {
+            if (hex) {
+                updateHexPolygon(hex, true);
+            }
+            if (previousHex) {
+                updateHexPolygon(previousHex, false);
+            }
+        }
+
+        function updateHexPolygon(hex, isHover) {
+            // 8af5f0
+            if (!transitionData.has(hex)) {
+                transitionData.set(hex, {
+                    startElevate: hex.elevate ? 0.01 : 0,
+                    endElevate: isHover ? 0.15 : 0,
+                    startColor: hex.color,
+                    endColor: isHover ? "#0a4577" : "#ffffff",
+                    duration: 0.1,
+                    progress: 0
+                });
+            } else {
+                const data = transitionData.get(hex);
+                data.endElevate = isHover ? 0.15 : 0;
+                data.endColor = isHover ? "#0a4577" : "#ffffff";
+                data.progress = 0;
+            }
+        }
+
+        // 애니메이션 루프
+        function animate() {
+            requestAnimationFrame(animate);
+            const delta = clock.getDelta();
+            const needsUpdate = updateTransitions(delta);
+
+            // Auto - rotate
+            // world.controls().autoRotate = true;
+            // world.controls().autoRotateSpeed = 0.05;
+
+            if (needsUpdate) {
+                world.hexPolygonsData([...world.hexPolygonsData()]);
+            }
+
+            // 구름 회전
+            clouds.rotation.y += CLOUDS_ROTATION_SPEED * Math.PI / 180;
+
+            world.controls().update();
+            renderer.render(scene, camera);
+
+        }
+
+        function updateTransitions(delta) {
+            let needsUpdate = false;
+            transitionData.forEach((data, hex) => {
+                if (data.progress < 1) {
+                    data.progress += delta / data.duration;
+                    if (data.progress > 1) data.progress = 1;
+                    const t = data.progress;
+
+                    hex.elevate = THREE.MathUtils.lerp(data.startElevate, data.endElevate, t);
+                    hex.color = interpolateColor(data.startColor, data.endColor, t);
+
+                    needsUpdate = true;
+                } else {
+                    transitionData.delete(hex);  // 완료된 데이터 삭제
+                }
+            });
+            return needsUpdate;
+        }
+
+
+        function handleBlinkArea(geoData) {
+
+        }
+
+        function interpolateColor(color1, color2, t) {
+            const c1 = new THREE.Color(color1);
+            const c2 = new THREE.Color(color2);
+            const c = c1.lerp(c2, t);
+            return `#${c.getHexString()}`;
+        }
+
+        init();
+    </script>
+</body>
+
+</html>

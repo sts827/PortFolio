@@ -5,6 +5,7 @@
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Content-Security-Policy" content="upgrade-insecure-requests">
     <link rel="stylesheet" href="static/style.css">
     <script src="main.js" defer></script>
     <link rel="preconnect" href="https://fonts.gstatic.com">
@@ -17,16 +18,20 @@
         <div class="navBar__logo">
             <i class="fas fa-door-open"></i>
             <a href="https://github.com/sts827">GreedyGuy</a>
-        </div>
+        </div>   
         <ul class="navBar__menus">
-            <li><a href="#">Home</a></li>
+            <li><a href="#">Home</a></li> 
             <li><a href="#about">About Me</a></li>
             <li><a href="#projects">MyProjects</a></li>
+            <li>
+                <a href="//localhost:8081/user/login">Login</a>
+            </li>
         </ul>
         <a href="#" class="navBar__toggleBtn">
             <i class="fas fa-bars"></i>
         </a>
     </header>
+    <div class="clear-fix"></div>
     <article class="content__container">
         <section class="profile">
             <img src="static/images/selfie.png" alt="">
@@ -75,7 +80,7 @@
                 <img src="static/images/cal_logo.png" alt="company__logo">
                 <h3>Worked at Cal as Software Engineer (20.01~05)</h3>
             </div>
-        </section>
+        </section>  
         <section class="myWork">
             <h1>My Experience</h1>
             <a href="" name="projects"></a>

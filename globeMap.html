@@ -1,0 +1,432 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="./globe.css">
+    <title>Marshal</title>
+    <!-- importmap 정의 -->
+    <script type="importmap">
+        {
+            "imports": {
+                "three": "https://cdn.jsdelivr.net/npm/three@0.166.1/build/three.module.js",
+                "OrbitControls":"https://cdn.jsdelivr.net/npm/three@0.166.1/examples/jsm/controls/OrbitControls.min.js",
+                "three-globe":"https://cdn.jsdelivr.net/npm/three-globe@2.31.1/+esm",
+                "trackControl":"https://cdn.jsdelivr.net/npm/three@0.166.1/examples/jsm/controls/TrackballControls.js",
+                "transformControls":"https://cdn.jsdelivr.net/npm/three@0.166.1/examples/jsm/controls/TransformControls.js",
+                "css2Renderer":"https://cdn.jsdelivr.net/npm/three@0.166.1/examples/jsm/renderers/CSS2DRenderer.js",
+                "tween":"https://cdn.jsdelivr.net/npm/@tweenjs/tween.js@23.1.2/+esm",
+                "starfield":"./static/js/starfield.js",
+                "frezenMat":"./static/js/fresnelMat.js",
+            }
+        }
+    </script>
+</head>
+
+<body>
+    <div id="globe"></div>
+    <div id="scroll">
+        <div class="chevron_down"></div>
+        <div class="mouse_icon"></div>
+    </div>
+    <article id="contents">
+        <section class="pages welcome">
+            <header>WelCome!</header>
+            <p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Excepturi ex iste vero esse placeat, ea
+                blanditiis id tempora voluptates temporibus reprehenderit. Voluptatum odit delectus saepe impedit maxime
+                exercitationem ipsa dicta!</p>
+        </section>
+        <section class="pages myGolas"></section>
+        <section class="pages history"></section>
+    </article>
+    <script>
+        let page = 0;
+        let height = 50;
+        const container = document.querySelector("#contents");
+        const pages = document.querySelectorAll("#contents .pages");
+        const lastPage = pages.length - 1;
+        let activation = false;
+
+        init();
+        function init() {
+
+            // scroll animationEnabled
+            scrollAnimation(false);
+        }
+
+        function scrollAnimation(enabled) {
+            console.log("enabled:", enabled);
+            const contents = document.querySelector("#contents");
+            const scroll = document.querySelector("#scroll");
+            if (enabled) {
+                scroll.style.display = "block";
+                contents.style.position = "absolute";
+                activation = true;
+            } else {
+                scroll.style.display = "none";
+                contents.style.position = "unset";
+                activation = false;
+            }
+            return activation;
+        }
+
+        // one pages scroll
+        const handleWheel = debounce((event) => {
+            console.log("event.deltaY: ", event.deltaY);
+            console.log("height: ", height);
+            console.log("activation: ", activation);
+            if (activation) {
+                if (event.deltaY > 0) {
+                    page++;
+                    height += 50;
+                }
+                if (event.deltaY < 0) {
+                    page--;
+                    height -= 50;
+                }
+                if (page < 0) {
+                    page = 0;
+                }
+                if (page > lastPage) {
+                    page = lastPage;
+                }
+                // container.style.transform = `translateY(-${page * 100}vh)`;
+                container.style.transform = `translateY(-${height}%)`;
+            } else {
+                console.log("not activation");
+            }
+
+        }, 300)
+
+        function debounce(func, wait) {
+            let timeout;
+            return function (...args) {
+                const context = this;
+                clearTimeout(timeout);
+                timeout = setTimeout(() => func.apply(context, args), wait);
+            };
+        }
+
+        document.addEventListener("wheel", handleWheel);
+
+    </script>
+    <script type="module">
+
+        import * as THREE from 'three';
+        import { OrbitControls } from 'OrbitControls';
+        import { TransformControls } from 'transformControls';
+        import { CSS2DRenderer } from 'css2Renderer';
+        import ThreeGlobe from "three-globe";
+        import TWEEN from 'tween';
+        import getStarfield from 'starfield';
+        import getFresnelMat from 'frezenMat';
+
+        // render dom
+        const globeContainer = document.getElementById("globe");
+        const transitionData = new Map();
+
+
+        // 초기 세팅
+        const SCREEN_WIDTH = window.innerWidth;
+        const SCREEN_HEIGHT = window.innerHeight;
+        const ASPECT = SCREEN_WIDTH / SCREEN_HEIGHT;
+
+        // texture image URL
+        const mapURL = "./static/images/globe/globe_map.jpg";
+        const normalURL = "./static/images/globe/earth_normal_2048.jpg";
+        const bumpURL = "./static/images/globe/earth_bump.jpg";
+        const spechURL = "./static/images/globe/earth_spec.jpg";
+        // const metalURL = "./static/images/globe/earth_spec.jpg"
+        // const emissiveURL = "./static/images/globe/earth_night.jpg";
+        const earthNight = "./static/images/globe/earth_night.jpg";
+        const earthNight_high = "./static/images/globe/night_sky.png"
+        const earthNight_low = "./static/images/globe/blackMarble.jpg"
+        const cloudURL = "./static/images/globe/clouds.png";
+
+        // const backgroundURL = "./static/images/globe/space_bg.png"
+        const sceneBgUrl = "./static/images/globe/background_space.jpg";
+
+        const CLOUDS_ALT = 0.004;
+        const CLOUDS_ROTATION_SPEED = -0.006; // deg/frame
+
+        // 지구의 자전 주기 (초 단위)
+        const EARTH_ROTATION_PERIOD = 23.9345 * 3600; // 23.9345시간 * 3600초
+        // 지구본 약간의 기울임을 위한 각도 설정 (라디안)
+        const tiltAngle = 23.5 * Math.PI / 180;; // 15도를 라디안으로 변환
+
+        // glsl파일 URL
+        const fragURL = "./shader/fragment.glsl";
+        const verURL = "./shader/vertex.glsl";
+
+        // 커스템 세이더
+        const customVetex = `
+varying vec2 vUv;
+varying vec3 vNormal;
+varying vec3 vSunDir;
+
+uniform vec3 sunDirection;
+
+void main(){
+  vUv=uv;
+  vec4 mvPosition=modelViewMatrix*vec4(position,1.);
+  
+  vNormal=normalMatrix*normal;
+  vSunDir=mat3(viewMatrix)*sunDirection;
+  
+  gl_Position=projectionMatrix*mvPosition;
+}`;
+        const customFrag = `
+uniform sampler2D dayTexture;
+uniform sampler2D nightTexture;
+
+varying vec2 vUv;
+varying vec3 vNormal;
+varying vec3 vSunDir;
+
+void main(void){
+  vec3 dayColor=texture2D(dayTexture,vUv).rgb;
+  vec3 nightColor=texture2D(nightTexture,vUv).rgb;
+  
+  float cosineAngleSunToNormal=dot(normalize(vNormal),normalize(vSunDir));
+  
+  cosineAngleSunToNormal=clamp(cosineAngleSunToNormal*5.,-1.,1.);
+  
+  float mixAmount=cosineAngleSunToNormal*.5+.5;
+  
+  vec3 color=mix(nightColor,dayColor,mixAmount);
+  
+  gl_FragColor=vec4(color,1.);
+}
+        `;
+
+        // 커스텀 메시
+        const pShader = new THREE.ShaderMaterial({
+            uniforms: {
+                sunDirection: { value: new THREE.Vector3(-2, -0.5, 1.5) },
+                dayTexture: { value: imageLoader(mapURL) },
+                nightTexture: { value: imageLoader(earthNight_low) }
+            },
+            vertexShader: customVetex,
+            fragmentShader: customFrag,
+        })
+
+        // 기본 메시
+        const pMaterial = new THREE.MeshPhongMaterial({
+            specular: 0x7c7c7c,
+            map: imageLoader(mapURL),
+            bumpMap: imageLoader(bumpURL),
+            specularMap: imageLoader(spechURL),
+            normalMap: imageLoader(normalURL),
+            normalScale: new THREE.Vector2(0.85, - 0.85),
+            shininess: 3
+        });
+        pMaterial.map.colorSpace = THREE.SRGBColorSpace;
+        // planet 객체
+        const planet = new ThreeGlobe();
+
+        // cloud texture
+        const pCloud = new THREE.Mesh(
+            new THREE.SphereGeometry(planet.getGlobeRadius() * (1 + CLOUDS_ALT), 75, 75),
+            new THREE.MeshStandardMaterial({
+                map: imageLoader(cloudURL),
+                transparent: true,
+                opacity: 0.8
+            })
+        )
+
+        // 대기
+        const customAtmosphere = new THREE.Mesh(
+            new THREE.SphereGeometry(planet.getGlobeRadius() * (1 + 0.006), 75, 75),
+            getFresnelMat()
+        );
+
+
+        // camera
+        const camera = new THREE.PerspectiveCamera();
+        camera.aspect = window.innerWidth / window.innerHeight;
+        camera.updateProjectionMatrix();
+        camera.position.z = 500;
+
+        // render
+        const renderer = new THREE.WebGLRenderer();
+        renderer.setSize(SCREEN_WIDTH, SCREEN_HEIGHT);
+        // renderer.setClearColor()
+        globeContainer.appendChild(renderer.domElement);
+
+
+        // scene
+        const scene = new THREE.Scene();
+        const stars = getStarfield({ numStars: 2000 });
+        scene.add(stars);
+        // 배경 설정
+        // const bg = imageLoader(sceneBgUrl);
+        // bg.mapping = THREE.EquirectangularRefractionMapping;
+        // bg.encoding = THREE.sRGBEncoding;
+        // scene.background = bg;
+
+
+        // control
+        let controls = new OrbitControls(camera, renderer.domElement);
+        // controls.minDistance = 101;
+        // controls.rotateSpeed = 5;
+        // controls.zoomSpeed = 0.8;
+        controls.enableDamping = true;
+        controls.dampingFactor = 0.1;
+        controls.maxDistance = 600;
+        controls.minDistance = 150;
+        controls.zoomSpeed = 0.3; // -> linear하게 1까지 변경
+
+        // light -> 초기화
+        // light.intensity = 0;
+        const sunLight = new THREE.DirectionalLight(0xffffff, 1.5 * Math.PI);
+        // sunLight.position.set(-2, -0.5, 1.5);
+        sunLight.position.set(5, 3, 5)
+        scene.add(sunLight);
+
+        init();
+        function init() {
+
+            scene.add(planet);
+
+            loadGeoJsonData().then(data => {
+                // earth 
+                planet.showAtmosphere(true)
+                    .atmosphereAltitude(0.5)
+                    .atmosphereColor("#21a1e1")
+                    .add(customAtmosphere)
+                    .globeMaterial(pShader)
+                // .globeMaterial(pMaterial)
+            })
+            // planet.globeMaterial(pShader)
+
+            // planet.add(pCloud)
+            console.log("center of View:..",)
+
+            // geoJson
+        }
+
+
+        function animate() {
+            controls.update();
+            renderer.render(scene, camera);
+            requestAnimationFrame(animate);
+            // add cloud texture
+            earthRotation();
+            // planet.rotation.y += 0.08 * Math.PI / 180
+        }
+
+        function earthRotation() {
+
+            const now = new Date();
+            const elapsedTime = now.getTime() / 1000; // 초 단위로 변환
+
+            // 지구의 자전: 주기에 따라 회전 (360도 = 2 * Math.PI 라디안)
+            const rotationAngle = (elapsedTime / EARTH_ROTATION_PERIOD) * 2 * Math.PI;
+
+            planet.rotation.x = tiltAngle;
+            planet.rotation.y = rotationAngle;
+            pCloud.rotation.y += CLOUDS_ROTATION_SPEED * Math.PI / 180;
+        }
+
+        function imageLoader(url) {
+            return new THREE.TextureLoader().load(url);
+        }
+
+        // Tween 애니메이션 함수
+        function animateCamera(targetPosition, targetLookAt, duration = 2000) {
+            new TWEEN.Tween(camera.position)
+                .to(targetPosition, duration)
+                .easing(TWEEN.Easing.Quadratic.InOut)
+                .onUpdate(() => {
+                    camera.lookAt(targetLookAt);
+                    controls.update();
+                })
+                .start();
+        }
+        // event listener
+
+        function showUpModal() {
+            const modal = document.querySelector("#modal");
+            modal.classList.add("show");
+        }
+
+        function loadHtmlFragment(url, id) {
+            return fetch(url)
+                .then((response) => response.text())
+                .then(function (html) {
+                    // html fragment 가져오기
+                    let html_dom = new DOMParser().parseFromString(html, 'text/html');
+                    console.log(html_dom.getElementById(`${id}`));
+                })
+        }
+
+        async function loadGeoJsonData() {
+            const geoJsonUrl = './data/geo.json';
+            const response = await fetch(geoJsonUrl);
+            const geoJsonData = await response.json();
+            const features = geoJsonData.features.map(item => ({
+                ...item,
+                color: "#ffffff",
+                elevate: false
+            }));
+            return features;
+
+            // planet.hexPolygonsData(features)
+            //     .hexPolygonMargin(0.1)
+            //     .hexPolygonColor(d => d.color)
+            //     .hexPolygonAltitude(d => d.elevate ? 0.01 : 0)
+            //     .onHexPolygonHover(handleHexPolygonHover, 50)
+            //     .onHexPolygonClick(handleSelectArea)
+        }
+
+        // renderer.domElement.addEventListener('wheel', function (event) {
+        //     controls.enabled = false;
+        // });
+
+        controls.addEventListener("change", function (event) {
+            // load html fragment
+            // console.log("wheel-event: ", event.target);
+            // // cam
+            // console.log("camera-world-direction: ", camera.getWorldDirection(new THREE.Vector3()));
+            // // globe position world coordinates
+            // console.log("globe-position: ", planet.position);
+
+            // // camera position world coordinates
+            console.log("camera-position:", camera.position);
+            console.log("camera-geoCode:..", planet.toGeoCoords(camera.position))
+            // // globe <-> camera: distance,
+            // console.log("distance with globe:", camera.position.distanceTo(planet.position));
+
+
+            // phase = (phase + 1) % 4;
+            // switch (phase) {
+            //     case 0:
+            //         animateCamera({ x: 0, y: -10, z: 14 }, planet.position);
+            //         break;
+            //     case 1:
+            //         animateCamera({ x: 0, y: 0, z: 14 }, planet.position);
+            //         break;
+            //     case 2:
+            //         animateCamera({ x: 10, y: 0, z: 14 }, planet.position);
+            //         break;
+            //     case 3:
+            //         animateCamera({ x: 0, y: 0, z: 14 }, planet.position);
+            //         break;
+            // }
+        })
+
+        window.addEventListener('resize', () => {
+            const width = window.innerWidth;
+            const height = window.innerHeight;
+            renderer.setSize(width, height);
+            camera.aspect = width / height;
+            camera.updateProjectionMatrix();
+        });
+
+        animate();
+    </script>
+
+</body>
+
+</html>
