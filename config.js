@@ -1,3 +1,3 @@
 const CONFIG = {
-  GEMINI_KEY: "testasdf123",
+  GEMINI_KEY: "123adfef3er",
 };

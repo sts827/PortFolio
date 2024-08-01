@@ -14,7 +14,7 @@
 
 # env file
 .env
-./config.js
+config.js
 # specific data file
 data/data.json
 data/geo_ls.json
